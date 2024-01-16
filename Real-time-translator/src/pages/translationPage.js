@@ -58,8 +58,8 @@ const TranslationPage = () => {
           };
         }
       } else {
-        console.log("tessst");
-        if (transcript && websocket && websocket.readyState === WebSocket.OPEN) {
+
+        if (transcript ) {
           websocket.send(
             JSON.stringify({
               transcript: transcript,
@@ -67,13 +67,6 @@ const TranslationPage = () => {
               toLanguage,
             })
           );
-          websocket.onmessage = event => {
-            const data = JSON.parse(event.data);
-            console.log(data);
-            setTranslation(data.translation);
-            setTranslationHighlightWords(data.highlightedWords);
-            setSpeechHighlightWords(data.speechHighlitedWords);
-          };
 
         }
       }
