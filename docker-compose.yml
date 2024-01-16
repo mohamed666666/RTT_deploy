@@ -1,0 +1,33 @@
+version: "3"
+services:
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+  backend:
+    build: ./back2
+    volumes:
+      - ./back2:/app
+  
+  
+  frontend:
+    build: ./Real-time-translator
+    volumes:
+      - ./Real-time-translator:/app
+    depends_on:
+      - backend
+    ports:
+      - 80:80
+  
+  nginx_backend_server:
+    build: ./nginx_backend_server
+    ports:
+        - 8000:8000
+    depends_on:
+        - backend
+        - redis
+    links:
+      - redis
+    
+    
+  
