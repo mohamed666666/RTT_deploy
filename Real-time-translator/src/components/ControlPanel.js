@@ -42,7 +42,7 @@ const ControlPanel = ({
   useEffect(() => {
     initializeWebSocket(
       setWebsocket,
-      'ws://localhost:8000/ws/app/translate/',
+      'wss://smartmaxco.com/ws/app/translate/',
       toast
     );
   }, [setWebsocket, toast]);
