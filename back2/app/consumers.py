@@ -38,8 +38,10 @@ class TranslatorConsumer(WebsocketConsumer):
         }
          
         translator = Translator()
-        translation = translator.translate(text_data_json["transcript"], src=slang, dest=dstlang)
-        transl=translation.text
+        transl=" "
+        if  "transcript" in text_data_json and text_data_json["transcript"]:
+            translation = translator.translate(text_data_json["transcript"], src=slang, dest=dstlang)
+            transl=translation.text
 
 
         if slang  in language_models :
