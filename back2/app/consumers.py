@@ -1,12 +1,14 @@
 import json
 from googletrans import Translator, LANGUAGES
-
+import requests, uuid, json
 from asgiref.sync import async_to_sync
 from googletrans import Translator, LANGUAGES
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.generic.websocket import WebsocketConsumer
 import spacy
 
+from azure.ai.textanalytics import TextAnalyticsClient
+from azure.core.credentials import AzureKeyCredential
 
 
 class TranslatorConsumer(WebsocketConsumer):
@@ -32,8 +34,9 @@ class TranslatorConsumer(WebsocketConsumer):
         'en': 'en_core_web_sm',
         'es': 'es_core_news_sm',
         'it': 'it_core_news_sm',
+        'ar':'xx_ent_wiki_sm'
         }
-  
+         
         translator = Translator()
         translation = translator.translate(text_data_json["transcript"], src=slang, dest=dstlang)
         transl=translation.text
@@ -56,9 +59,6 @@ class TranslatorConsumer(WebsocketConsumer):
                 ent2.append(ent.text)
                 labels2.append(ent.label_)
 
-        print(ent1)
-        print(ent2)
-        print(transl)
         self.send(text_data=json.dumps({
                         'translation': transl,
                          "speechHighlitedWords":{
@@ -77,6 +77,24 @@ class TranslatorConsumer(WebsocketConsumer):
 
 
 
+"""
+        if slang  in language_models :
+            nlp = spacy.load(language_models[slang])
+            doc = nlp(text_data_json["transcript"])
+            for ent in doc.ents:
+                ent1.append(ent.text)
+                labels1.append(ent.label_)
+            
+        
+        
+        if dstlang  in language_models :
+            print(language_models[dstlang])
+            nlp = spacy.load(language_models[dstlang])
+            doc = nlp(transl)
+            for ent in doc.ents:
+                ent2.append(ent.text)
+                labels2.append(ent.label_)
+"""
 
 class NerConsumer(WebsocketConsumer):
     def connect(self):
@@ -113,4 +131,5 @@ class NerConsumer(WebsocketConsumer):
             #    entities.append(entity.text)
             #    labels.append(entity.labels[0].value)
             #return entities, labels
+
 
