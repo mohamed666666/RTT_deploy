@@ -31,9 +31,9 @@ class TranslatorConsumer(WebsocketConsumer):
         slang=text_data_json["fromLanguage"]
         dstlang=text_data_json["toLanguage"]
         language_models = {
-        'en': 'en_core_web_sm',
-        'es': 'es_core_news_sm',
-        'it': 'it_core_news_sm',
+        'en': 'en_core_web_md',
+        'es': 'es_core_news_md',
+        'it': 'it_core_news_md',
         'ar':'xx_ent_wiki_sm'
         }
          
@@ -42,25 +42,35 @@ class TranslatorConsumer(WebsocketConsumer):
         if  "transcript" in text_data_json and text_data_json["transcript"]:
             translation = translator.translate(text_data_json["transcript"], src=slang, dest=dstlang)
             transl=translation.text
+        keyn = "7b3d268d25b542d58a217fd5ce4658ab"
+        endpointn = "https://ner-app.cognitiveservices.azure.com/" 
+        ta_credential = AzureKeyCredential(keyn)
+        text_analytics_client = TextAnalyticsClient(
+            endpoint=endpointn, 
+            credential=ta_credential)
+        try:
+            documents = [ text_data_json["transcript"]]
+            result = text_analytics_client.recognize_entities(documents = documents)[0]
+            for entity in result.entities:
+                  ent1.append(entity.text)
+                  labels1.append(entity.category)
+                 
 
-
-        if slang  in language_models :
-            nlp = spacy.load(language_models[slang])
-            doc = nlp(text_data_json["transcript"])
-            for ent in doc.ents:
-                ent1.append(ent.text)
-                labels1.append(ent.label_)
-            
+        except Exception as err:
+             print("Encountered exception. {}".format(err))
         
-        
-        if dstlang  in language_models :
-            print(language_models[dstlang])
-            nlp = spacy.load(language_models[dstlang])
-            doc = nlp(transl)
-            for ent in doc.ents:
-                ent2.append(ent.text)
-                labels2.append(ent.label_)
+        try:
+            documents = [transl ]
+            result = text_analytics_client.recognize_entities(documents = documents)[0]
+            for entity in result.entities:
+                  ent2.append(entity.text)
+                  labels2.append(entity.category)
+                 (err))
 
+
+        except Exception as err:
+             print("Encountered exception. {}".format(err))
+         
         self.send(text_data=json.dumps({
                         'translation': transl,
                          "speechHighlitedWords":{
