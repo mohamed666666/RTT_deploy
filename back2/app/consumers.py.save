@@ -31,19 +31,82 @@ class TranslatorConsumer(WebsocketConsumer):
         slang=text_data_json["fromLanguage"]
         dstlang=text_data_json["toLanguage"]
         language_models = {
-        'en': 'en_core_web_sm',
-        'es': 'es_core_news_sm',
-        'it': 'it_core_news_sm',
+        'en': 'en_core_web_md',
+        'es': 'es_core_news_md',
+        'it': 'it_core_news_md',
         'ar':'xx_ent_wiki_sm'
         }
          
         translator = Translator()
-        transl=" "
-        if  "transcript" in text_data_json and text_data_json["transcript"]:
-            translation = translator.translate(text_data_json["transcript"], src=slang, dest=dstlang)
-            transl=translation.text
+        transl=" 
+"
+        keyn = "7b3d268d25b542d58a217fd5ce4658ab"
+        endpointn = "https://ner-app.cognitiveservices.azure.com/" 
+        ta_credential = AzureKeyCredential(keyn)
+        text_analytics_client = TextAnalyticsClient(
+            endpoint=endpointn, 
+            credential=ta_credential)
+        try:
+            documents = [ text_data_json["transcript"]]
+            result = text_analytics_client.recognize_entities(documents = documents)[0]
+            for entity in result.entities:
+                  ent1.append(entity.text)
+                  labels1.append(entity.category)
+                 
+
+        except Exception as err:
+             print("Encountered exception. {}".format(err))
+        
+        try:
+            documents = [transl ]
+            result = text_analytics_client.recognize_entities(documents = documents)[0]
+            for entity in result.entities:
+                  ent2.append(entity.text)
+                  labels2.append(entity.category)
+                 
+
+        except Exception as err:
+             print("Encountered exception. {}".format(err))
+        
+
+"""
+        if slang  in language_models :
+            nlp = spacy.load(language_models[slang])
+            doc = nlp(text_data_json["transcript"])
+            for ent in doc.ents:
+                ent1.append(ent.text)
+                labels1.append(ent.label_)
+            
+        
+        
+        if dstlang  in language_models :
+            print(language_models[dstlang])
+            nlp = spacy.load(language_models[dstlang])
+            doc = nlp(transl)
+            for ent in doc.ents:
+                ent2.append(ent.text)
+                labels2.append(ent.label_)"""
+        print(ent1)
+        print(ent2)
+        self.send(text_data=json.dumps({
+                        'translation': transl,
+                         "speechHighlitedWords":{
+                            "label":labels1,
+                            "entity":ent1
+                         },
+                        "highlightedWords":{
+                            "label":labels2,
+                            "entity":ent2
+                        }                    }))
 
 
+    def disconnect(self, close_code):
+        # Called when the socket closes
+        self.close()
+
+
+
+"""
         if slang  in language_models :
             nlp = spacy.load(language_models[slang])
             doc = nlp(text_data_json["transcript"])
@@ -60,22 +123,7 @@ class TranslatorConsumer(WebsocketConsumer):
             for ent in doc.ents:
                 ent2.append(ent.text)
                 labels2.append(ent.label_)
-
-        self.send(text_data=json.dumps({
-                        'translation': transl,
-                         "speechHighlitedWords":{
-                            "label":labels1,
-                            "entity":ent1
-                         },
-                        "highlightedWords":{
-                            "label":labels2,
-                            "entity":ent2
-                        }                    }))
-
-
-    def disconnect(self, close_code):
-        # Called when the socket closes
-        self.close()
+"""
 
 class NerConsumer(WebsocketConsumer):
     def connect(self):
@@ -102,3 +150,15 @@ class NerConsumer(WebsocketConsumer):
     def disconnect(self, close_code):
         # Called when the socket closes
         self.close()
+    
+   # def ner_en( text):
+            #tagger = SequenceTagger.load("flair/ner-english")
+           # sentence = Sentence(text)
+           # pred = tagger.predict(sentence)
+            #entities, labels = [], []
+           # for entity in sentence.get_spans('ner'):
+            #    entities.append(entity.text)
+            #    labels.append(entity.labels[0].value)
+            #return entities, labels
+
+
